@@ -5,7 +5,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aaks.RestclientTests.models
+namespace Aaks.RestclientTests.Model
 {
     public class HttpResponse<T>
     {
