@@ -195,6 +195,53 @@ namespace Aaks.Restclient
             }
         }
 
+        public async Task<HttpResponse<T>> DeleteAsync<T>(string url, Dictionary<string, string> headers = null)
+        {
+            try
+            {
+                HttpWebRequest httpWebRequest = (HttpWebRequest)WebRequest.Create(url);
+                httpWebRequest.ContentType = "application/json";
+                httpWebRequest.Method = "DELETE";
+
+                if (IpAddress != null)
+                {
+
+                }
+
+                if (headers != null)
+                {
+                    foreach (string key in headers.Keys)
+                    {
+                        httpWebRequest.Headers.Add(key, headers[key]);
+                    }
+                }
+
+                HttpWebResponse httpWebResponse = (HttpWebResponse) await httpWebRequest.GetResponseAsync();
+
+                HttpResponse<T> response = new HttpResponse<T>();
+                return response;
+
+            }
+            catch (WebException e)
+            {
+                using (WebResponse webResponse = e.Response)
+                {
+                    HttpWebResponse httpResponse = (HttpWebResponse)webResponse;
+                    Console.WriteLine("Error code: {0}", httpResponse.StatusCode);
+
+                    using (Stream data = webResponse.GetResponseStream())
+                    using (var reader = new StreamReader(data))
+                    {
+                        HttpResponse<T> response = new HttpResponse<T>();
+                        response.ErrorMessage = reader.ReadToEnd();
+                        response.StatusCode = httpResponse.StatusCode;
+                        return response;
+
+                    }
+                }
+            }
+        }
+
         public HttpResponse<T> Get<T>(string url, Dictionary<string, string> headers = null)
         {
             try
