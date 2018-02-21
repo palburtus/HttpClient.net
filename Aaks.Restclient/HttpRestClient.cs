@@ -364,7 +364,7 @@ namespace Aaks.Restclient
                     string stream = await streamReader.ReadToEndAsync();
                     Type type = typeof(T);
 
-                    if(type != typeof(string[]))
+                    if(type == typeof(string[]))
                     {
                         throw new InvalidCastException("Cannot deserialize array of T use List<T> instead");
                     }
