@@ -168,12 +168,29 @@ namespace Aaks.Restclient
                         httpWebRequest.Headers.Add(key, headers[key]);
                     }
                 }
-                
+
                 HttpWebResponse httpWebResponse = (HttpWebResponse)httpWebRequest.GetResponse();
 
-                HttpResponse<T> response = new HttpResponse<T>();  
-                return response;
-                
+                using (Stream responseStream = httpWebResponse.GetResponseStream())
+                {
+
+                    StreamReader streamReader = new StreamReader(responseStream, Encoding.UTF8);
+
+                    string stream = streamReader.ReadToEnd();
+                    HttpResponse<T> response = new HttpResponse<T>();
+                    Type type = typeof(T);
+                    if (type != typeof(string))
+                    {
+                        response.Body = Deserialize<T>(stream);
+                    }
+                    else
+                    {
+                        response.Body = (T)Convert.ChangeType(stream, typeof(T));
+                    }
+                    response.StatusCode = HttpStatusCode.OK;
+                    return response;
+
+                }
             }
             catch (WebException e)
             {
