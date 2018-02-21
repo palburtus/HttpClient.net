@@ -233,11 +233,29 @@ namespace Aaks.Restclient
                     }
                 }
 
-                HttpWebResponse httpWebResponse = (HttpWebResponse) await httpWebRequest.GetResponseAsync();
+                HttpWebResponse httpWebResponse = (HttpWebResponse)await httpWebRequest.GetResponseAsync();
+                
+                using (Stream responseStream = httpWebResponse.GetResponseStream())
+                {
 
-                HttpResponse<T> response = new HttpResponse<T>();
-                return response;
+                    StreamReader streamReader = new StreamReader(responseStream, Encoding.UTF8);
 
+                    string stream = await streamReader.ReadToEndAsync();
+                    HttpResponse<T> response = new HttpResponse<T>();
+                    Type type = typeof(T);
+                    if (type != typeof(string))
+                    {
+                        response.Body = Deserialize<T>(stream);
+                    }
+                    else
+                    {
+                        response.Body = (T)Convert.ChangeType(stream, typeof(T));
+                    }
+                    response.StatusCode = HttpStatusCode.OK;
+                    return response;
+
+                }
+            
             }
             catch (WebException e)
             {
