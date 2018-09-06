@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.27428.2043
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aaks.Restclient", "Aaks.Restclient\Aaks.Restclient.csproj", "{9A3A0CD0-4198-42D9-9072-FCFEDE6703F2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aaks.RestclientTests", "Aaks.RestclientTests\Aaks.RestclientTests.csproj", "{AEDFEDAB-00D9-40E3-B440-DA0B76B11541}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{3F30788D-A38F-45F5-9E59-159586082539}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,5 +26,11 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{AEDFEDAB-00D9-40E3-B440-DA0B76B11541} = {3F30788D-A38F-45F5-9E59-159586082539}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7376EA48-C69C-4CE2-956C-8DC7596CD418}
 	EndGlobalSection
 EndGlobal

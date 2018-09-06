@@ -52,7 +52,8 @@
   </Choose>
   <ItemGroup>
     <Compile Include="HttpRestClientTests.cs" />
-    <Compile Include="models\ExamplePostResponse.cs" />
+    <Compile Include="Models\ExamplePostResponse.cs" />
+    <Compile Include="Oauth\OauthAuthenticationManagerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

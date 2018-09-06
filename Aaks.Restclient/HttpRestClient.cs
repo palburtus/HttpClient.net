@@ -18,12 +18,21 @@ namespace Aaks.Restclient
             IpAddress = ipAddress;
         }
 
-        public HttpResponse<T> Post<T, K>(string url, K body, Dictionary<string, string> headers = null)
+        public HttpResponse<T> Post<T, K>(string url, K body, Dictionary<string, string> headers = null, string contentType = null)
         {
             try
             {
                 HttpWebRequest httpWebRequest = (HttpWebRequest)WebRequest.Create(url);
-                httpWebRequest.ContentType = "application/json";
+
+                if (contentType != null)
+                {
+                    httpWebRequest.ContentType = contentType;
+                }
+                else
+                {
+                    httpWebRequest.ContentType = "application/json";
+                }
+
                 httpWebRequest.Method = "POST";
                 if (headers != null)
                 {
