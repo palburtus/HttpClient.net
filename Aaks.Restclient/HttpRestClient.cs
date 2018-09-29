@@ -18,6 +18,76 @@ namespace Aaks.Restclient
             IpAddress = ipAddress;
         }
 
+        public HttpResponse<T> PostApplicationForm<T>(string url, string body, Dictionary<string, string> headers = null)
+        {
+            try
+            {
+                WebRequest request = WebRequest.Create(url);
+                // Set the Method property of the request to POST.  
+                request.Method = "POST";
+                // Create POST data and convert it to a byte array.  
+                string postData = body;
+                byte[] byteArray = Encoding.UTF8.GetBytes(postData);
+                // Set the ContentType property of the WebRequest.  
+                request.ContentType = "application/x-www-form-urlencoded";
+                // Set the ContentLength property of the WebRequest.  
+                request.ContentLength = byteArray.Length;
+                // Get the request stream.  
+                Stream dataStream = request.GetRequestStream();
+                // Write the data to the request stream.  
+                dataStream.Write(byteArray, 0, byteArray.Length);
+                // Close the Stream object.  
+                dataStream.Close();
+                // Get the response.  
+                WebResponse response = request.GetResponse();
+                // Display the status.  
+                Console.WriteLine(((HttpWebResponse)response).StatusDescription);
+                // Get the stream containing content returned by the server.  
+                dataStream = response.GetResponseStream();
+                // Open the stream using a StreamReader for easy access.  
+                StreamReader reader = new StreamReader(dataStream);
+                // Read the content.  
+                string responseFromServer = reader.ReadToEnd();
+                // Display the content. 
+
+                HttpResponse<T> httpResposne = new HttpResponse<T>();
+                Type type = typeof(T);
+                if (type != typeof(string))
+                {
+                    httpResposne.Body = Deserialize<T>(responseFromServer);
+                }
+                else
+                {
+                    httpResposne.Body = (T)Convert.ChangeType(responseFromServer, typeof(T));
+                }
+
+                httpResposne.StatusCode = HttpStatusCode.OK;
+                return httpResposne;
+                // Clean up the streams.  
+                //reader.Close();
+                //dataStream.Close();
+                //response.Close();
+            }
+            catch (WebException e)
+            {
+                using (WebResponse webResponse = e.Response)
+                {
+                    HttpWebResponse httpResponse = (HttpWebResponse)webResponse;
+                    Console.WriteLine("Error code: {0}", httpResponse.StatusCode);
+
+                    using (Stream data = webResponse.GetResponseStream())
+                    using (var reader = new StreamReader(data))
+                    {
+                        HttpResponse<T> response = new HttpResponse<T>();
+                        response.ErrorMessage = reader.ReadToEnd();
+                        response.StatusCode = httpResponse.StatusCode;
+                        return response;
+
+                    }
+                }
+            }
+        }
+
         public HttpResponse<T> Post<T, K>(string url, K body, Dictionary<string, string> headers = null, string contentType = null)
         {
             try
