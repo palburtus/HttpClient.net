@@ -52,7 +52,10 @@ namespace Aaks.Restclient
 
                 var response = (HttpWebResponse) httpWebRequest.GetResponse();
 
-                var reader = new StreamReader(response.GetResponseStream());
+                string charSet = response.CharacterSet;
+                Encoding encoding = Encoding.GetEncoding(charSet);
+                
+                var reader = new StreamReader(response.GetResponseStream(), encoding);
 
                 string stream = reader.ReadToEnd();
                 HttpResponse<T> httpResposne = new HttpResponse<T>();
@@ -116,8 +119,12 @@ namespace Aaks.Restclient
                 }
 
                 var response = (HttpWebResponse)await httpWebRequest.GetResponseAsync();
-                
-                var reader = new StreamReader(response.GetResponseStream());
+
+                string charSet = response.CharacterSet;
+                Encoding encoding = Encoding.GetEncoding(charSet);
+
+
+                var reader = new StreamReader(response.GetResponseStream(), encoding);
 
                 string stream = await reader.ReadToEndAsync();
                 HttpResponse<T> httpResposne = new HttpResponse<T>();
@@ -180,10 +187,14 @@ namespace Aaks.Restclient
 
                 HttpWebResponse httpWebResponse = (HttpWebResponse)httpWebRequest.GetResponse();
 
+                string charSet = httpWebResponse.CharacterSet;
+                Encoding encoding = Encoding.GetEncoding(charSet);
+
+
                 using (Stream responseStream = httpWebResponse.GetResponseStream())
                 {
 
-                    StreamReader streamReader = new StreamReader(responseStream, Encoding.UTF8);
+                    StreamReader streamReader = new StreamReader(responseStream, encoding);
 
                     string stream = streamReader.ReadToEnd();
                     HttpResponse<T> response = new HttpResponse<T>();
@@ -243,11 +254,14 @@ namespace Aaks.Restclient
                 }
 
                 HttpWebResponse httpWebResponse = (HttpWebResponse)await httpWebRequest.GetResponseAsync();
-                
+                string charSet = httpWebResponse.CharacterSet;
+                Encoding encoding = Encoding.GetEncoding(charSet);
+
+
                 using (Stream responseStream = httpWebResponse.GetResponseStream())
                 {
 
-                    StreamReader streamReader = new StreamReader(responseStream, Encoding.UTF8);
+                    StreamReader streamReader = new StreamReader(responseStream, encoding);
 
                     string stream = await streamReader.ReadToEndAsync();
                     HttpResponse<T> response = new HttpResponse<T>();
@@ -308,12 +322,16 @@ namespace Aaks.Restclient
                 }
 
                
-                HttpWebResponse httpWebResponse = (HttpWebResponse)httpWebRequest.GetResponse();
+                HttpWebResponse httpWebResponse = 
+                    (HttpWebResponse)httpWebRequest.GetResponse();
+
+                string charSet = httpWebResponse.CharacterSet;
+                Encoding encoding = Encoding.GetEncoding(charSet);
 
                 using (Stream responseStream = httpWebResponse.GetResponseStream())
                 {
 
-                    StreamReader streamReader = new StreamReader(responseStream, Encoding.UTF8);
+                    StreamReader streamReader = new StreamReader(responseStream, encoding);
 
                     string stream = streamReader.ReadToEnd();
                     HttpResponse<T> response = new HttpResponse<T>();
@@ -367,9 +385,13 @@ namespace Aaks.Restclient
 
                 HttpWebResponse httpWebResponse = (HttpWebResponse)await httpWebRequest.GetResponseAsync();
 
+                string charSet = httpWebResponse.CharacterSet;
+                Encoding encoding = Encoding.GetEncoding(charSet);
+
+
                 using (Stream responseStream = httpWebResponse.GetResponseStream())
                 {
-                    StreamReader streamReader = new StreamReader(responseStream, Encoding.UTF8);
+                    StreamReader streamReader = new StreamReader(responseStream, encoding);
                     string stream = await streamReader.ReadToEndAsync();
                     Type type = typeof(T);
 
@@ -417,7 +439,7 @@ namespace Aaks.Restclient
         private T Deserialize<T>(string json)
         {
             T obj = Activator.CreateInstance<T>();
-            MemoryStream ms = new MemoryStream(Encoding.Unicode.GetBytes(json));
+            MemoryStream ms = new MemoryStream(Encoding.UTF8.GetBytes(json));
             DataContractJsonSerializer serializer = new DataContractJsonSerializer(obj.GetType());
             obj = (T)serializer.ReadObject(ms);
             ms.Close();
