@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Aaks.Restclient
 {
-    public class HttpRestClient
+    public class HttpRestClient : IHttpRestClient
     {
         private string IpAddress;
 

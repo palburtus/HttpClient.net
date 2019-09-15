@@ -43,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="HttpRestClient.cs" />
+    <Compile Include="IHttpRestClient.cs" />
     <Compile Include="Models\HttpResponse.cs" />
     <Compile Include="Oauth\OauthAuthenticationManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
