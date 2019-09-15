@@ -18,11 +18,7 @@ namespace Aaks.Restclient
             IpAddress = ipAddress;
         }
 
-        public HttpResponse<T> Post<T, K>(string url, K body, Dictionary<string, string> headers = null)
-        {
-            return Post<T, K>(url, body, headers, null);
-        }
-
+  
         public HttpResponse<T> Post<T, K>(string url, K body, Dictionary<string, string> headers = null, string contentType = null)
         {
             try
