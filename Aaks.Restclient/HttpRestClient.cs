@@ -25,16 +25,10 @@ namespace Aaks.Restclient
             {
                 HttpWebRequest httpWebRequest = (HttpWebRequest)WebRequest.Create(url);
 
-                if (contentType != null)
-                {
-                    httpWebRequest.ContentType = contentType;
-                }
-                else
-                {
-                    httpWebRequest.ContentType = "application/json";
-                }
+                httpWebRequest.ContentType = contentType ?? "application/json";
 
                 httpWebRequest.Method = "POST";
+
                 if (headers != null)
                 {
                     foreach (string key in headers.Keys)
