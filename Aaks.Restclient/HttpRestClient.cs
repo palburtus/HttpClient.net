@@ -1,4 +1,6 @@
-﻿using Aaks.RestclientTests.Model;
+﻿using Aaks.Restclient.Enums;
+using Aaks.Restclient.Models;
+using Aaks.RestclientTests.Model;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -6,6 +8,7 @@ using System.Net;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 
 namespace Aaks.Restclient
 {
@@ -58,7 +61,7 @@ namespace Aaks.Restclient
 
                 if (type != typeof(string))
                 {
-                    httpResposne.Body = Deserialize<T>(stream);
+                    httpResposne.Body = DeserializeJson<T>(stream);
                 }
                 else
                 {
@@ -127,7 +130,7 @@ namespace Aaks.Restclient
 
                 if (type != typeof(string))
                 {
-                    httpResposne.Body = Deserialize<T>(stream);
+                    httpResposne.Body = DeserializeJson<T>(stream);
                 }
                 else
                 {
@@ -196,7 +199,7 @@ namespace Aaks.Restclient
                     Type type = typeof(T);
                     if (type != typeof(string))
                     {
-                        response.Body = Deserialize<T>(stream);
+                        response.Body = DeserializeJson<T>(stream);
                     }
                     else
                     {
@@ -263,7 +266,7 @@ namespace Aaks.Restclient
                     Type type = typeof(T);
                     if (type != typeof(string))
                     {
-                        response.Body = Deserialize<T>(stream);
+                        response.Body = DeserializeJson<T>(stream);
                     }
                     else
                     {
@@ -333,7 +336,7 @@ namespace Aaks.Restclient
                     Type type = typeof(T);
                     if (type != typeof(string))
                     {
-                        response.Body = Deserialize<T>(stream);
+                        response.Body = DeserializeJson<T>(stream);
                     }
                     else
                     {
@@ -362,42 +365,65 @@ namespace Aaks.Restclient
                 }
             }
         }
-        
-        public async Task<HttpResponse<T>> GetAsync<T>(string url, Dictionary<string, string> headers = null)
+
+        public async Task<HttpResponse<T>> GetAsync<T>(HttpRequest request)
         {
             try
             {
-                HttpWebRequest httpWebRequest = (HttpWebRequest)WebRequest.Create(url);
+                HttpWebRequest httpWebRequest = (HttpWebRequest)WebRequest.Create(request.Url);
                 httpWebRequest.ContentType = "application/json";
                 httpWebRequest.Method = "GET";
-                if (headers != null)
+
+                if (request.Headers != null)
                 {
-                    foreach (string key in headers.Keys)
+                    foreach (string key in request.Headers.Keys)
                     {
-                        httpWebRequest.Headers.Add(key, headers[key]);
+                        httpWebRequest.Headers.Add(key, request.Headers[key]);
                     }
                 }
 
-                HttpWebResponse httpWebResponse = (HttpWebResponse)await httpWebRequest.GetResponseAsync();
+                if(request.AuthType == AuthorizationTypes.BASIC)
+                {
+                    string encodedBasicCredentials = 
+                        Convert.ToBase64String(Encoding.GetEncoding("ISO-8859-1").GetBytes(request.BasicAuthCredentials.UserName + ":" + request.BasicAuthCredentials.Password));
 
-                string charSet = httpWebResponse.CharacterSet;
-                Encoding encoding = Encoding.GetEncoding(charSet);
+                    httpWebRequest.Headers.Add("Authorization", "Basic " + encodedBasicCredentials);
+                }
 
+                HttpWebResponse httpWebResponse = (HttpWebResponse) await httpWebRequest.GetResponseAsync();
+
+                Encoding encoding = null;
+
+                if (request.AuthType != AuthorizationTypes.BASIC)
+                {
+                    string charSet = httpWebResponse.CharacterSet;
+                    encoding = Encoding.GetEncoding(charSet);
+                }
 
                 using (Stream responseStream = httpWebResponse.GetResponseStream())
                 {
-                    StreamReader streamReader = new StreamReader(responseStream, encoding);
+                    StreamReader streamReader = request.AuthType != AuthorizationTypes.BASIC ? new StreamReader(responseStream, encoding) : new StreamReader(responseStream);
                     string stream = await streamReader.ReadToEndAsync();
                     Type type = typeof(T);
 
-                    if(type == typeof(string[]))
+                    if (type == typeof(string[]))
                     {
                         throw new InvalidCastException("Cannot deserialize array of T use List<T> instead");
                     }
 
                     HttpResponse<T> response = new HttpResponse<T>();
 
-                    response.Body = type != typeof(string) ? Deserialize<T>(stream) : (T)Convert.ChangeType(stream, typeof(T));
+                    if(request.ResponseType == ResponseType.JSON)
+                    {
+                        response.Body = type != typeof(string) ?
+                            DeserializeJson<T>(stream) : (T)Convert.ChangeType(stream, typeof(T));
+                    }
+                    else if(request.ResponseType == ResponseType.XML)
+                    {
+                        response.Body = DeserializeXml<T>(stream);
+                    }
+
+
                     response.StatusCode = HttpStatusCode.OK;
 
                     return response;
@@ -408,7 +434,7 @@ namespace Aaks.Restclient
                 using (WebResponse webResponse = e.Response)
                 {
                     HttpWebResponse httpResponse = (HttpWebResponse)webResponse;
-                  
+
                     using (Stream data = webResponse.GetResponseStream())
                     using (var reader = new StreamReader(data))
                     {
@@ -422,25 +448,40 @@ namespace Aaks.Restclient
             }
         }
 
+        public async Task<HttpResponse<T>> GetAsync<T>(string url, Dictionary<string, string> headers = null)
+        {
+            return await GetAsync<T>(new HttpRequest { Url = url, Headers = headers });
+        }
+
         private string Serialize<T>(T obj)
         {
             DataContractJsonSerializer serializer = new DataContractJsonSerializer(obj.GetType());
-            MemoryStream ms = new MemoryStream();
-            serializer.WriteObject(ms, obj);
-            string retVal = Encoding.UTF8.GetString(ms.ToArray());
-            return retVal;
+            using (MemoryStream ms = new MemoryStream())
+            {
+                serializer.WriteObject(ms, obj);
+                string retVal = Encoding.UTF8.GetString(ms.ToArray());
+                return retVal;
+            }   
         }
 
-        private T Deserialize<T>(string json)
+        private T DeserializeJson<T>(string json)
         {
             T obj = Activator.CreateInstance<T>();
-            MemoryStream ms = new MemoryStream(Encoding.UTF8.GetBytes(json));
-            DataContractJsonSerializer serializer = new DataContractJsonSerializer(obj.GetType());
-            obj = (T)serializer.ReadObject(ms);
-            ms.Close();
-            return obj;
+            using (MemoryStream ms = new MemoryStream(Encoding.UTF8.GetBytes(json)))
+            {
+                DataContractJsonSerializer serializer = new DataContractJsonSerializer(obj.GetType());
+                obj = (T)serializer.ReadObject(ms);
+                ms.Close();
+                return obj;
+            }
         }
 
-        
+        private T DeserializeXml<T>(string xml)
+        {
+            XmlSerializer xmlSerializer = new XmlSerializer(typeof(T));
+            var obj = (T)xmlSerializer.Deserialize(new StringReader(xml));
+
+            return obj;
+        }
     }
 }

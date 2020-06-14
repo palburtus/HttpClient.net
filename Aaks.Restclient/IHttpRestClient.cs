@@ -1,4 +1,6 @@
-﻿using Aaks.RestclientTests.Model;
+﻿using Aaks.Restclient.Enums;
+using Aaks.Restclient.Models;
+using Aaks.RestclientTests.Model;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -12,6 +14,7 @@ namespace Aaks.Restclient
         HttpResponse<T> Delete<T>(string url, Dictionary<string, string> headers = null);
         Task<HttpResponse<T>> DeleteAsync<T>(string url, Dictionary<string, string> headers = null);
         HttpResponse<T> Get<T>(string url, Dictionary<string, string> headers = null);
+        Task<HttpResponse<T>> GetAsync<T>(HttpRequest request);
         Task<HttpResponse<T>> GetAsync<T>(string url, Dictionary<string, string> headers = null);
     }
 }

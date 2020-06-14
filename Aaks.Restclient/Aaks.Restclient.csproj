@@ -42,8 +42,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Enums\AuthorizationTypes.cs" />
+    <Compile Include="Enums\ResponseType.cs" />
+    <Compile Include="Exceptions\HttpException.cs" />
     <Compile Include="HttpRestClient.cs" />
     <Compile Include="IHttpRestClient.cs" />
+    <Compile Include="Models\HttpRequest.cs" />
     <Compile Include="Models\HttpResponse.cs" />
     <Compile Include="Oauth\OauthAuthenticationManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
