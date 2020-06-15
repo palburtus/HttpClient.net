@@ -10,6 +10,7 @@ namespace Aaks.Restclient.Models
     public class HttpRequest
     {
         public string Url { get; set; }
+
         public Dictionary<string, string> Headers { get; set; }
         public ResponseType ResponseType { get; set; } = ResponseType.JSON;
         public AuthorizationTypes AuthType { get; set; } = AuthorizationTypes.NONE;

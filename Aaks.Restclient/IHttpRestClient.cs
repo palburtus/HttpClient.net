@@ -11,6 +11,7 @@ namespace Aaks.Restclient
         void SetIpAddress(string ipAddress);
         HttpResponse<T> Post<T, K>(string url, K body, Dictionary<string, string> headers = null, string contentType = null);
         Task<HttpResponse<T>> PostAsync<T, K>(string url, K body, Dictionary<string, string> headers = null);
+        Task<HttpResponse<T>> PostAsync<T, K>(HttpPostRequest<K> request);
         HttpResponse<T> Delete<T>(string url, Dictionary<string, string> headers = null);
         Task<HttpResponse<T>> DeleteAsync<T>(string url, Dictionary<string, string> headers = null);
         HttpResponse<T> Get<T>(string url, Dictionary<string, string> headers = null);
