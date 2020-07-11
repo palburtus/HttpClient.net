@@ -98,8 +98,18 @@ namespace Aaks.Restclient
             try
             {
                 HttpWebRequest httpWebRequest = (HttpWebRequest)WebRequest.Create(request.Url);
-                httpWebRequest.ContentType = request.RequestType == RequestType.JSON ? 
-                    "application/json" : "application/xml; charset=utf-8";
+                switch (request.RequestType)
+                {
+                    case RequestType.XML:
+                        httpWebRequest.ContentType = "application/xml; charset=utf-8";
+                        break;
+                    case RequestType.APPLICATION:
+                        httpWebRequest.ContentType = "application /x-www-form-urlencoded";
+                        break;
+                    default:
+                        httpWebRequest.ContentType = "application/json";
+                        break;
+                }
 
                 httpWebRequest.Method = "POST";
                 
@@ -119,14 +129,25 @@ namespace Aaks.Restclient
                     httpWebRequest.Headers.Add("Authorization", "Basic " + encodedBasicCredentials);
                 }
 
-                var serializedResult = request.RequestType == RequestType.XML ?
-                    SerializeXml<K>(request.Body) : SerializeJson<K>(request.Body);
-                
-                byte[] requestBody = Encoding.UTF8.GetBytes(serializedResult);
-
-                using (var postStream = await httpWebRequest.GetRequestStreamAsync())
+                if (request.RequestType != RequestType.APPLICATION)
                 {
-                    await postStream.WriteAsync(requestBody, 0, requestBody.Length);
+                    var serializedResult = request.RequestType == RequestType.XML ?
+                        SerializeXml<K>(request.Body) : SerializeJson<K>(request.Body);
+
+                    byte[] requestBody = Encoding.UTF8.GetBytes(serializedResult);
+
+                    using (var postStream = await httpWebRequest.GetRequestStreamAsync())
+                    {
+                        await postStream.WriteAsync(requestBody, 0, requestBody.Length);
+                    }
+                }
+                else
+                {
+                    byte[] requestBytes = new ASCIIEncoding().GetBytes(request.Body.ToString());
+                    using (Stream requestStream = httpWebRequest.GetRequestStream())
+                    {
+                        await requestStream.WriteAsync(requestBytes, 0, requestBytes.Length);
+                    }
                 }
 
                 var response = (HttpWebResponse)await httpWebRequest.GetResponseAsync();

@@ -9,6 +9,7 @@ namespace Aaks.Restclient.Enums
     public enum RequestType
     {
         JSON,
-        XML
+        XML,
+        APPLICATION
     }
 }
