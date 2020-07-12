@@ -129,7 +129,8 @@ namespace Aaks.Restclient
                     httpWebRequest.Headers.Add("Authorization", "Basic " + encodedBasicCredentials);
                 }
 
-                if (request.RequestType != RequestType.APPLICATION)
+                Type requestType = typeof(K);
+                if (requestType != typeof(string))
                 {
                     var serializedResult = request.RequestType == RequestType.XML ?
                         SerializeXml<K>(request.Body) : SerializeJson<K>(request.Body);
@@ -163,29 +164,29 @@ namespace Aaks.Restclient
                 using (var reader = encoding != null ? new StreamReader(response.GetResponseStream(), encoding) : new StreamReader(response.GetResponseStream()))
                 {
                     string stream = await reader.ReadToEndAsync();
-                    HttpResponse<T> httpResposne = new HttpResponse<T>();
+                    HttpResponse<T> httpResponse = new HttpResponse<T>();
                     Type type = typeof(T);
 
                     if (type != typeof(string))
                     {
                         if (request.ResponseType == ResponseType.XML)
                         {
-                            httpResposne.Body = DeserializeXml<T>(stream);
+                            httpResponse.Body = DeserializeXml<T>(stream);
                         }
                         else
                         {
-                            httpResposne.Body = DeserializeJson<T>(stream);
+                             httpResponse.Body = DeserializeJson<T>(stream);
                         }
 
                     }
                     else
                     {
-                        httpResposne.Body = (T)Convert.ChangeType(stream, typeof(T));
+                        httpResponse.Body = (T)Convert.ChangeType(stream, typeof(T));
                     }
 
-                    httpResposne.StatusCode = HttpStatusCode.OK;
+                    httpResponse.StatusCode = HttpStatusCode.OK;
 
-                    return httpResposne;
+                    return httpResponse;
                 }
             }
             catch (WebException e)
