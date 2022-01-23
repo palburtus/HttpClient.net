@@ -455,7 +455,7 @@ namespace Aaks.Restclient
                         httpWebRequest.ContentType = "application /x-www-form-urlencoded";
                         break;
                     default:
-                        httpWebRequest.ContentType = "application/json";
+                httpWebRequest.ContentType = "application/json";
                         break;
                 }
                 httpWebRequest.Method = "DELETE";
@@ -471,7 +471,7 @@ namespace Aaks.Restclient
                     {
                         httpWebRequest.Headers.Add(key, request.Headers[key]);
                     }
-                }
+                    }
 
                 if (request.AuthType == AuthorizationTypes.BASIC)
                 {
@@ -487,7 +487,7 @@ namespace Aaks.Restclient
 
                 if (request.AuthType != AuthorizationTypes.BASIC)
                 {
-                    string charSet = httpWebResponse.CharacterSet;
+                string charSet = httpWebResponse.CharacterSet;
                     encoding = Encoding.GetEncoding(charSet);
                 }
 
@@ -520,7 +520,7 @@ namespace Aaks.Restclient
                     return response;
 
                 }
-
+            
             }
             catch (WebException e)
             {
